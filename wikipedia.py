@@ -9,7 +9,7 @@ driver = webdriver.Chrome(options=chrome_options)
 
 driver.get("https://en.wikipedia.org/wiki/Main_Page")
 
-# for CSS selector, put a period before CSS stuff, a # before id
+# CSS selectors: a period before classes, a # before id
 num_articles = driver.find_element(By.CSS_SELECTOR,
                                    "#mp-welcomecount #articlecount a")
 
