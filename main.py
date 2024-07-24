@@ -37,12 +37,12 @@ while True:
     #                               ------BUY THINGS------
     # ---------------------find upgrade with highest value and buy ----------------------------------------
     # im always getting stale ref errors when trying to click upgrades.
-    upgrade = driver.find_element(By.CSS_SELECTOR, "#store #upgrades .enabled ")
-    if upgrade:
-        try:
-            upgrade.click()
-        except:
-            pass
+    # upgrade = driver.find_element(By.CSS_SELECTOR, "#store #upgrades .enabled ")
+    # if upgrade:
+    #     try:
+    #         upgrade.click()
+    #     except:
+    #         pass
 
     # ---------------------find product with highest value and buy ----------------------------------------
     products = driver.find_elements(By.CSS_SELECTOR, "#store .enabled .price")
