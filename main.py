@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 from selenium.webdriver.chrome.options import Options
 
@@ -10,8 +11,9 @@ chrome_options.add_argument("user-data-dir=selenium")
 chrome_options.add_experimental_option("detach", True)
 
 driver = webdriver.Chrome(options=chrome_options)
-
 driver.get("https://orteil.dashnet.org/cookieclicker/")
+actions = ActionChains(driver)
+
 time.sleep(8)
 
 quittin_time = time.time() + 60 * 1.1
@@ -26,17 +28,19 @@ while True:
     # cookie-earning code
     # click big cookie
     driver.find_element(By.CSS_SELECTOR, value="#bigCookie").click()
-    # click golden cookie - doesnt work rn, tries to click an unclickable element
-    # golden_cookie = driver.find_element(By.CSS_SELECTOR, ".goldenCookie")
+
+    # click golden cookie
+    # golden_cookie = driver.find_element(By.CSS_SELECTOR, "#shimmers .shimmer")
     # if golden_cookie:
     #     golden_cookie.click()
+
     #                               ------BUY THINGS------
     # ---------------------find upgrade with highest value and buy ----------------------------------------
     # im always getting stale ref errors when trying to click upgrades.
-    upgrades = driver.find_elements(By.CSS_SELECTOR, "#store #upgrades .enabled ")
-    if upgrades:
+    upgrade = driver.find_element(By.CSS_SELECTOR, "#store #upgrades .enabled ")
+    if upgrade:
         try:
-            upgrades[-1].click()
+            upgrade.click()
         except:
             pass
 
