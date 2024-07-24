@@ -1,9 +1,15 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 import time
-from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException
+import threading
+
+
+def click_cookie():
+    big_cookie = driver.find_element(By.CSS_SELECTOR, value="#bigCookie")
+    while True:
+        big_cookie.click()
 
 
 # keep Chrome open after program finishes by configuring option and passing that as arg below
@@ -18,20 +24,26 @@ actions = ActionChains(driver)
 
 time.sleep(8)
 
-quittin_time = time.time() + 60 * 1.1
+start_time = time.time()
+quittin_time = start_time + 60 * 1.1
 lv = 0
+
+# click big cookie, threaded
+thread = threading.Thread(target=click_cookie)
+thread.start()
+
 while True:
     if lv == 10000:
         if time.time() > quittin_time:
-            driver.quit()
+            # driver.quit()
             break
         else:
             lv = 0
 
     # ------cookie-earning code------
-    # click big cookie
-    big_cookie = driver.find_element(By.CSS_SELECTOR, value="#bigCookie")
-    big_cookie.click()
+    # click big cookie, unthreaded
+    # big_cookie = driver.find_element(By.CSS_SELECTOR, value="#bigCookie")
+    # big_cookie.click()
 
     # get current cookies - not doing anything with this variable currently
     cookie_count = driver.find_element(By.ID, "cookies").text.split("c")[0].replace(",", "")
@@ -52,11 +64,11 @@ while True:
     try:
         upgrade = driver.find_element(By.CSS_SELECTOR, "#store #upgrades .enabled")
         upgrade.click()
-    except NoSuchElementException:
+    except NoSuchElementException or StaleElementReferenceException:
         pass
 
     # ---------------------find product with highest value and buy ----------------------------------------
-    products = driver.find_elements(By.CSS_SELECTOR, "#store .enabled .price")
+    products = driver.find_elements(By.CSS_SELECTOR, "#products .enabled .price")
     product_prices = [int(product.text.replace(",", "")) for product in products]
     if product_prices:
         max_value = max(product_prices)
