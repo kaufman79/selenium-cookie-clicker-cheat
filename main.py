@@ -1,27 +1,52 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
-
+from selenium.webdriver.chrome.options import Options
 
 
 # keep Chrome open after program finishes by configuring option and passing that as arg below
 chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("user-data-dir=selenium")
 chrome_options.add_experimental_option("detach", True)
 
 driver = webdriver.Chrome(options=chrome_options)
 
 driver.get("https://orteil.dashnet.org/cookieclicker/")
-time.sleep(12)
+time.sleep(8)
 
-five_minutes_hence = time.time() + 60*5
+quittin_time = time.time() + 60 * 1.1
 lv = 0
 while True:
-    if lv == 1000:
-        if time.time() > five_minutes_hence:
+    if lv == 10000:
+        if time.time() > quittin_time:
+            driver.quit()
             break
         else:
             lv = 0
+    # cookie-earning code
+    # click big cookie
+    driver.find_element(By.CSS_SELECTOR, value="#bigCookie").click()
+    # click golden cookie - doesnt work rn, tries to click an unclickable element
+    # golden_cookie = driver.find_element(By.CSS_SELECTOR, ".goldenCookie")
+    # if golden_cookie:
+    #     golden_cookie.click()
+    #                               ------BUY THINGS------
+    # ---------------------find upgrade with highest value and buy ----------------------------------------
+    # im always getting stale ref errors when trying to click upgrades.
+    upgrades = driver.find_elements(By.CSS_SELECTOR, "#store #upgrades .enabled ")
+    if upgrades:
+        try:
+            upgrades[-1].click()
+        except:
+            pass
 
-    print(lv)
+    # ---------------------find product with highest value and buy ----------------------------------------
+    products = driver.find_elements(By.CSS_SELECTOR, "#store .enabled .price")
+    product_prices = [int(product.text.replace(",", "")) for product in products]
+    if product_prices:
+        max_value = max(product_prices)
+        max_index = product_prices.index(max_value)
+        grandparent_emendum = products[max_index].find_element(By.XPATH, "../..")
+        grandparent_emendum.click()
 
     lv += 1
