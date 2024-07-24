@@ -3,10 +3,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
 
 
 # keep Chrome open after program finishes by configuring option and passing that as arg below
 chrome_options = webdriver.ChromeOptions()
+# load cookies, ie save file
 chrome_options.add_argument("user-data-dir=selenium")
 chrome_options.add_experimental_option("detach", True)
 
@@ -25,24 +27,33 @@ while True:
             break
         else:
             lv = 0
-    # cookie-earning code
-    # click big cookie
-    driver.find_element(By.CSS_SELECTOR, value="#bigCookie").click()
 
+    # ------cookie-earning code------
+    # click big cookie
+    big_cookie = driver.find_element(By.CSS_SELECTOR, value="#bigCookie")
+    big_cookie.click()
+
+    # get current cookies - not doing anything with this variable currently
+    cookie_count = driver.find_element(By.ID, "cookies").text.split("c")[0].replace(",", "")
+    cookie_count = int(cookie_count)
+
+    #------------------------------------------------------------------------------------------------------
     # click golden cookie
-    # golden_cookie = driver.find_element(By.CSS_SELECTOR, "#shimmers .shimmer")
-    # if golden_cookie:
-    #     golden_cookie.click()
+    try:
+        golden_cookie = driver.find_element(By.CSS_SELECTOR, "#shimmers .shimmer")
+        if golden_cookie:
+            golden_cookie.click()
+    except NoSuchElementException:
+        pass
 
     #                               ------BUY THINGS------
     # ---------------------find upgrade with highest value and buy ----------------------------------------
     # im always getting stale ref errors when trying to click upgrades.
-    # upgrade = driver.find_element(By.CSS_SELECTOR, "#store #upgrades .enabled ")
-    # if upgrade:
-    #     try:
-    #         upgrade.click()
-    #     except:
-    #         pass
+    try:
+        upgrade = driver.find_element(By.CSS_SELECTOR, "#store #upgrades .enabled")
+        upgrade.click()
+    except NoSuchElementException:
+        pass
 
     # ---------------------find product with highest value and buy ----------------------------------------
     products = driver.find_elements(By.CSS_SELECTOR, "#store .enabled .price")
