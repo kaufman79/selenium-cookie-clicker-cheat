@@ -19,9 +19,9 @@ certain lines.
 """
 
 # variables that effect performance, to write into csv
-MINUTES_RUN = 1
-LOOPS_PER_CYCLE = 200
-DELAY_PER_CYCLE = 6
+MINUTES_RUN = 5
+LOOPS_PER_CYCLE = 400
+DELAY_PER_CYCLE = 7
 
 file_exists = os.path.isfile("results.csv")
 
@@ -108,6 +108,7 @@ while True:
     if time.time() > quittin_time:
         thread.stop()
         cookies_per_second = driver.find_element(By.CSS_SELECTOR, "#cookiesPerSecond").text
+        cookies_per_second = cookies_per_second.split(" ")[2]
         print("cookies ", cookies_per_second)
         reset()
         append_csv()
