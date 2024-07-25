@@ -19,10 +19,13 @@ certain lines of code.
 """
 
 # variables that affect algorithm performance, to write into csv
+# D_INC_RATE - delay increase rate - is multiplied by the current cycle
+# and added to DELAY_PER_CYCLE
 MINUTES_RUN = 5
-DELAY_PER_LOOP = 2
-LOOPS_PER_CYCLE = 700
-DELAY_PER_CYCLE = 12
+DELAY_PER_LOOP = 0
+LOOPS_PER_CYCLE = 400
+DELAY_PER_CYCLE = 10
+D_INC_RATE = 1.5
 
 file_exists = os.path.isfile("results.csv")
 
@@ -33,7 +36,8 @@ def append_csv():
             "minutes_run",
             "delay/loop",
             "loops/cycle",
-            "delay/cycle",
+            "base_delay/cycle",
+            "delay_increase_rate",
             "final_cookies/second"
             ])
 
@@ -44,7 +48,8 @@ def append_csv():
             "minutes_run": MINUTES_RUN,
             "loops/cycle": LOOPS_PER_CYCLE,
             "delay/loop": DELAY_PER_LOOP,
-            "delay/cycle": DELAY_PER_CYCLE,
+            "base_delay/cycle": DELAY_PER_CYCLE,
+            "delay_increase_rate": D_INC_RATE,
             "final_cookies/second": cookies_per_second
         }]
 
@@ -112,7 +117,7 @@ while True:
         thread.stop()
         cookies_per_second = driver.find_element(By.CSS_SELECTOR, "#cookiesPerSecond").text
         cookies_per_second = cookies_per_second.split(" ")[2]
-        print("cookies ", cookies_per_second)
+        print("cookies per second: ", cookies_per_second)
         reset()
         append_csv()
         # driver.quit()
@@ -122,7 +127,7 @@ while True:
         cycle += 1
         print("cycle: ", cycle)
         loop_nr = 0
-        time.sleep(DELAY_PER_CYCLE)
+        time.sleep(DELAY_PER_CYCLE + cycle * D_INC_RATE)
 
     # ------cookie-earning code------
 
