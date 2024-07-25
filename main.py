@@ -6,10 +6,43 @@ import time
 import threading
 
 
-def click_cookie():
-    big_cookie = driver.find_element(By.CSS_SELECTOR, value="#bigCookie")
-    while True:
-        big_cookie.click()
+# variables that effect performance, to write into csv
+MINUTES_RUN = 1
+LOOPS_PER_CYCLE = 300
+DELAY_PER_CYCLE = 10
+
+# ---
+
+def write_CSV():
+    pass
+
+def reset():
+    driver.find_element(By.CSS_SELECTOR, value="#prefsButton").click()
+    time.sleep(0.5)
+    driver.find_element(By.CSS_SELECTOR, value=".warning").click()
+    time.sleep(0.5)
+    driver.find_element(By.CSS_SELECTOR, value='#promptOption0').click()
+    time.sleep(0.5)
+    driver.find_element(By.CSS_SELECTOR, value='#promptOption0').click()
+    time.sleep(0.5)
+    # save:
+    driver.find_element(By.XPATH, '//*[@id="menu"]/div[3]/div/div[3]/a').click()
+    driver.find_element(By.CSS_SELECTOR, value="#prefsButton").click()
+
+
+class StoppableThread(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self._stop_event = threading.Event()
+
+    def run(self):
+        big_cookie = driver.find_element(By.CSS_SELECTOR, value="#bigCookie")
+        while not self._stop_event.is_set():
+            big_cookie.click()
+        print("Thread is stopping")
+
+    def stop(self):
+        self._stop_event.set()
 
 
 # keep Chrome open after program finishes by configuring option and passing that as arg below
@@ -22,61 +55,37 @@ driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://orteil.dashnet.org/cookieclicker/")
 actions = ActionChains(driver)
 
-time.sleep(10)
-
+start_delay = 35
+time.sleep(start_delay)
 
 start_time = time.time()
-quittin_time = start_time + 60 * 0.3
-lv = 0
+quittin_time = start_time + 60 * MINUTES_RUN
+loop_nr = 0
 cycle = 1
-
-# --------------------click big cookie, threaded--------------------
-big_cookie = driver.find_element(By.CSS_SELECTOR, value="#bigCookie")
-
-
-class StoppableThread(threading.Thread):
-    def __init__(self):
-        super().__init__()
-        self._stop_event = threading.Event()
-
-    def run(self):
-        while not self._stop_event.is_set():
-            big_cookie.click()
-        print("Thread is stopping")
-
-    def stop(self):
-        self._stop_event.set()
-
 
 thread = StoppableThread()
 thread.start()
-# --------------------end of click big cookie, threaded--------------------
-
 
 print("cycle: ", cycle)
 
 while True:
-    if lv == 1000:
+    if loop_nr == LOOPS_PER_CYCLE:
         cycle += 1
         print("cycle: ", cycle)
         if time.time() > quittin_time:
             thread.stop()
-            print("cookies ", driver.find_element(By.CSS_SELECTOR, "#cookiesPerSecond").text)
-            # ----------the following code will wipe the save to start fresh next time--------------
-            driver.find_element(By.CSS_SELECTOR, value="#prefsButton").click()
-            time.sleep(1)
-            driver.find_element(By.CSS_SELECTOR, value=".warning").click()
-            time.sleep(1)
-            driver.find_element(By.CSS_SELECTOR, value='#promptOption0').click()
-            time.sleep(1)
+            cookies_per_second = driver.find_element(By.CSS_SELECTOR, "#cookiesPerSecond").text
+            print("cookies ", cookies_per_second)
 
-            driver.find_element(By.CSS_SELECTOR, value='#promptOption0').click()
-            driver.find_element(By.CSS_SELECTOR, value="#prefsButton").click()
+            # ----------the following code will wipe the save to start fresh next time--------------
+            reset()
+
+            time.sleep(0.5)
             # driver.quit()
             break
         else:
-            lv = 0
-            time.sleep(30)
+            loop_nr = 0
+            time.sleep(DELAY_PER_CYCLE)
 
     # ------cookie-earning code------
     # click big cookie, unthreaded
@@ -97,11 +106,11 @@ while True:
     #     pass
 
     #                               ------BUY THINGS------
-    # ---------------------find upgrade with highest value and buy ----------------------------------------
-    #
+    # ---------------------buy upgrades, start with cheapest ---------------------------
     try:
-        upgrade = driver.find_element(By.CSS_SELECTOR, "#store #upgrades .enabled")
-        upgrade.click()
+        upgrades = driver.find_elements(By.CSS_SELECTOR, "#store #upgrades .enabled")
+        for upgrade in upgrades:
+            upgrade.click()
     except (NoSuchElementException, StaleElementReferenceException):
         pass
 
@@ -111,8 +120,8 @@ while True:
     if product_prices:
         max_value = max(product_prices)
         max_index = product_prices.index(max_value)
-        grandparent_emendum = products[max_index].find_element(By.XPATH, "../..")
-        grandparent_emendum.click()
+        grandparent_to_buy = products[max_index].find_element(By.XPATH, "../..")
+        grandparent_to_buy.click()
 
     # loop count
-    lv += 1
+    loop_nr += 1
