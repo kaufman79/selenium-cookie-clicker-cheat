@@ -15,30 +15,68 @@ def click_cookie():
 # keep Chrome open after program finishes by configuring option and passing that as arg below
 chrome_options = webdriver.ChromeOptions()
 # load cookies, ie save file
-chrome_options.add_argument("user-data-dir=selenium")
+chrome_options.add_argument("user-data-dir=fresh_start")
 chrome_options.add_experimental_option("detach", True)
 
 driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://orteil.dashnet.org/cookieclicker/")
 actions = ActionChains(driver)
 
-time.sleep(8)
+time.sleep(10)
+
 
 start_time = time.time()
-quittin_time = start_time + 60 * 1.1
+quittin_time = start_time + 60 * 0.3
 lv = 0
+cycle = 1
 
-# click big cookie, threaded
-thread = threading.Thread(target=click_cookie)
+# --------------------click big cookie, threaded--------------------
+big_cookie = driver.find_element(By.CSS_SELECTOR, value="#bigCookie")
+
+
+class StoppableThread(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self._stop_event = threading.Event()
+
+    def run(self):
+        while not self._stop_event.is_set():
+            big_cookie.click()
+        print("Thread is stopping")
+
+    def stop(self):
+        self._stop_event.set()
+
+
+thread = StoppableThread()
 thread.start()
+# --------------------end of click big cookie, threaded--------------------
+
+
+print("cycle: ", cycle)
 
 while True:
-    if lv == 10000:
+    if lv == 1000:
+        cycle += 1
+        print("cycle: ", cycle)
         if time.time() > quittin_time:
+            thread.stop()
+            print("cookies ", driver.find_element(By.CSS_SELECTOR, "#cookiesPerSecond").text)
+            # ----------the following code will wipe the save to start fresh next time--------------
+            driver.find_element(By.CSS_SELECTOR, value="#prefsButton").click()
+            time.sleep(1)
+            driver.find_element(By.CSS_SELECTOR, value=".warning").click()
+            time.sleep(1)
+            driver.find_element(By.CSS_SELECTOR, value='#promptOption0').click()
+            time.sleep(1)
+
+            driver.find_element(By.CSS_SELECTOR, value='#promptOption0').click()
+            driver.find_element(By.CSS_SELECTOR, value="#prefsButton").click()
             # driver.quit()
             break
         else:
             lv = 0
+            time.sleep(30)
 
     # ------cookie-earning code------
     # click big cookie, unthreaded
@@ -46,25 +84,25 @@ while True:
     # big_cookie.click()
 
     # get current cookies - not doing anything with this variable currently
-    cookie_count = driver.find_element(By.ID, "cookies").text.split("c")[0].replace(",", "")
-    cookie_count = int(cookie_count)
+    # cookie_count = driver.find_element(By.ID, "cookies").text.split("c")[0].replace(",", "")
+    # cookie_count = int(cookie_count)
 
     #------------------------------------------------------------------------------------------------------
     # click golden cookie
-    try:
-        golden_cookie = driver.find_element(By.CSS_SELECTOR, "#shimmers .shimmer")
-        if golden_cookie:
-            golden_cookie.click()
-    except NoSuchElementException:
-        pass
+    # try:
+    #     golden_cookie = driver.find_element(By.CSS_SELECTOR, "#shimmers .shimmer")
+    #     if golden_cookie:
+    #         golden_cookie.click()
+    # except NoSuchElementException:
+    #     pass
 
     #                               ------BUY THINGS------
     # ---------------------find upgrade with highest value and buy ----------------------------------------
-    # im always getting stale ref errors when trying to click upgrades.
+    #
     try:
         upgrade = driver.find_element(By.CSS_SELECTOR, "#store #upgrades .enabled")
         upgrade.click()
-    except NoSuchElementException or StaleElementReferenceException:
+    except (NoSuchElementException, StaleElementReferenceException):
         pass
 
     # ---------------------find product with highest value and buy ----------------------------------------
@@ -76,4 +114,5 @@ while True:
         grandparent_emendum = products[max_index].find_element(By.XPATH, "../..")
         grandparent_emendum.click()
 
+    # loop count
     lv += 1
