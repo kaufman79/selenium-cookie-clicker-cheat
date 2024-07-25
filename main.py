@@ -4,19 +4,55 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 import time
 import threading
+import csv
+import os
 
+
+# Notes:
+""" 
+- Cookie clicker saves your save in a cookies file. Selenium can handle this with the line `chrome_options.add_argument("user-data-dir=fresh_start")`
+which saves those files in a folder in the project dir. Before first run, youll want to set start
+delay to a high value so you can go in, select your language and change some necessary settings.
+- in settings, you must change screen reader mode to on for the upgrades (not buildings) to work. 
+You should also change Short Numbers to off, in case you ever get into the millions, which would break
+certain lines.
+"""
 
 # variables that effect performance, to write into csv
 MINUTES_RUN = 1
-LOOPS_PER_CYCLE = 300
-DELAY_PER_CYCLE = 10
+LOOPS_PER_CYCLE = 200
+DELAY_PER_CYCLE = 6
 
-# ---
+file_exists = os.path.isfile("results.csv")
 
-def write_CSV():
-    pass
+
+def append_csv():
+    with open("results.csv", mode='a', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=[
+            "minutes_run",
+            "loops/cycle",
+            "delay/cycle",
+            "final_cookies/second"
+            ])
+
+        if not file_exists:
+            writer.writeheader()
+
+        data = [{
+            "minutes_run": MINUTES_RUN,
+            "loops/cycle": LOOPS_PER_CYCLE,
+            "delay/cycle": DELAY_PER_CYCLE,
+            "final_cookies/second": cookies_per_second
+        }]
+
+        for row in data:
+            writer.writerow(row)
+
 
 def reset():
+    """
+     goes to options to wipe save, then saves game, exits options
+    """
     driver.find_element(By.CSS_SELECTOR, value="#prefsButton").click()
     time.sleep(0.5)
     driver.find_element(By.CSS_SELECTOR, value=".warning").click()
@@ -55,7 +91,7 @@ driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://orteil.dashnet.org/cookieclicker/")
 actions = ActionChains(driver)
 
-start_delay = 35
+start_delay = 10
 time.sleep(start_delay)
 
 start_time = time.time()
@@ -76,11 +112,8 @@ while True:
             thread.stop()
             cookies_per_second = driver.find_element(By.CSS_SELECTOR, "#cookiesPerSecond").text
             print("cookies ", cookies_per_second)
-
-            # ----------the following code will wipe the save to start fresh next time--------------
             reset()
-
-            time.sleep(0.5)
+            append_csv()
             # driver.quit()
             break
         else:
@@ -88,15 +121,12 @@ while True:
             time.sleep(DELAY_PER_CYCLE)
 
     # ------cookie-earning code------
-    # click big cookie, unthreaded
-    # big_cookie = driver.find_element(By.CSS_SELECTOR, value="#bigCookie")
-    # big_cookie.click()
 
-    # get current cookies - not doing anything with this variable currently
+    # -------get current cookies - not doing anything with this variable currently
     # cookie_count = driver.find_element(By.ID, "cookies").text.split("c")[0].replace(",", "")
     # cookie_count = int(cookie_count)
 
-    #------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------
     # click golden cookie
     # try:
     #     golden_cookie = driver.find_element(By.CSS_SELECTOR, "#shimmers .shimmer")
