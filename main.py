@@ -15,13 +15,14 @@ which saves those files in a folder in the project dir. Before first run, youll 
 delay to a high value so you can go in, select your language and change some necessary settings.
 - in settings, you must change screen reader mode to on for the upgrades (not buildings) to work. 
 You should also change Short Numbers to off, in case you ever get into the millions, which would break
-certain lines.
+certain lines of code.
 """
 
-# variables that effect performance, to write into csv
+# variables that affect algorithm performance, to write into csv
 MINUTES_RUN = 5
-LOOPS_PER_CYCLE = 400
-DELAY_PER_CYCLE = 7
+DELAY_PER_LOOP = 2
+LOOPS_PER_CYCLE = 700
+DELAY_PER_CYCLE = 12
 
 file_exists = os.path.isfile("results.csv")
 
@@ -30,6 +31,7 @@ def append_csv():
     with open("results.csv", mode='a', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=[
             "minutes_run",
+            "delay/loop",
             "loops/cycle",
             "delay/cycle",
             "final_cookies/second"
@@ -41,6 +43,7 @@ def append_csv():
         data = [{
             "minutes_run": MINUTES_RUN,
             "loops/cycle": LOOPS_PER_CYCLE,
+            "delay/loop": DELAY_PER_LOOP,
             "delay/cycle": DELAY_PER_CYCLE,
             "final_cookies/second": cookies_per_second
         }]
@@ -154,5 +157,6 @@ while True:
         grandparent_to_buy = products[max_index].find_element(By.XPATH, "../..")
         grandparent_to_buy.click()
 
+    time.sleep(DELAY_PER_LOOP)
     # loop count
     loop_nr += 1
