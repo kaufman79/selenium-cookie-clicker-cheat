@@ -24,8 +24,8 @@ certain lines of code.
 MINUTES_RUN = 5
 DELAY_PER_LOOP = 0
 LOOPS_PER_CYCLE = 400
-DELAY_PER_CYCLE = 10
-D_INC_RATE = 1.5
+DELAY_PER_CYCLE = 15
+D_INC_RATE = 1
 
 file_exists = os.path.isfile("results.csv")
 
@@ -127,7 +127,7 @@ while True:
         cycle += 1
         print("cycle: ", cycle)
         loop_nr = 0
-        time.sleep(DELAY_PER_CYCLE + cycle * D_INC_RATE)
+        time.sleep(DELAY_PER_CYCLE + (cycle -1) * D_INC_RATE)
 
     # ------cookie-earning code------
 
