@@ -105,20 +105,20 @@ thread.start()
 print("cycle: ", cycle)
 
 while True:
+    if time.time() > quittin_time:
+        thread.stop()
+        cookies_per_second = driver.find_element(By.CSS_SELECTOR, "#cookiesPerSecond").text
+        print("cookies ", cookies_per_second)
+        reset()
+        append_csv()
+        # driver.quit()
+        break
+
     if loop_nr == LOOPS_PER_CYCLE:
         cycle += 1
         print("cycle: ", cycle)
-        if time.time() > quittin_time:
-            thread.stop()
-            cookies_per_second = driver.find_element(By.CSS_SELECTOR, "#cookiesPerSecond").text
-            print("cookies ", cookies_per_second)
-            reset()
-            append_csv()
-            # driver.quit()
-            break
-        else:
-            loop_nr = 0
-            time.sleep(DELAY_PER_CYCLE)
+        loop_nr = 0
+        time.sleep(DELAY_PER_CYCLE)
 
     # ------cookie-earning code------
 
