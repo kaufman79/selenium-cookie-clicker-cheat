@@ -33,6 +33,7 @@ LOOPS_PER_CYCLE = 900
 DELAY_PER_CYCLE = 4
 D_INC_RATE = 1.3  # delay increase rate
 D_INC_TYPE = 1  # 0 for linear, 1 for quadratic, 2 for logarithmic
+TARGET_CURSORS = 15
 # -------------------------------------------------------------------------
 start_delay = 10
 
@@ -47,6 +48,7 @@ def append_csv():
             "base_delay/cycle",
             "delay_increase_rate",
             "delay_increase_type",
+            "target_cursors",
             "final_cookies/second",
             "notes"
             ])
@@ -61,6 +63,7 @@ def append_csv():
             "base_delay/cycle": DELAY_PER_CYCLE,
             "delay_increase_rate": D_INC_RATE,
             "delay_increase_type": D_INC_TYPE,
+            "target_cursors": TARGET_CURSORS,
             "final_cookies/second": cookies_per_second,
             "notes": ""
         }]
@@ -116,6 +119,8 @@ start_time = time.time()
 quittin_time = start_time + 60 * MINUTES_RUN
 loop_nr = 0
 cycle = 1
+
+hit_target_cursors = False
 
 thread = StoppableThread()
 thread.start()
@@ -178,14 +183,29 @@ while True:
     except (NoSuchElementException, StaleElementReferenceException):
         pass
 
-    # ---------------------find product with highest value and buy ----------------------------------------
-    products = driver.find_elements(By.CSS_SELECTOR, "#products .enabled .price")
-    product_prices = [int(product.text.replace(",", "")) for product in products]
-    if product_prices:
-        max_value = max(product_prices)
-        max_index = product_prices.index(max_value)
-        grandparent_to_buy = products[max_index].find_element(By.XPATH, "../..")
-        grandparent_to_buy.click()
+    # -----------------find products and buy, starting with most advanced --------------------
+    if not hit_target_cursors:  # buy any, including cursors
+        products = driver.find_elements(By.CSS_SELECTOR, "#products .enabled")
+        if products:
+            for i in range(min(2, len(products) - 1), -1, -1):
+                products[i].click()
+
+        # get cursors owned number
+        cursor_text = driver.find_element(By.CSS_SELECTOR, "#store #products #productOwned0").text
+        if cursor_text == "":
+            nr_cursors = 0
+        else:
+            nr_cursors = int(cursor_text)
+
+        if nr_cursors == TARGET_CURSORS:
+            hit_target_cursors = True
+
+    else:  # dont buy cursors
+        products = driver.find_elements(By.CSS_SELECTOR, "#products .enabled")
+        if products:
+            for i in range(min(2, len(products) - 1), 0, -1):
+                products[i].click()
+
 
     time.sleep(DELAY_PER_LOOP)
     # loop count
