@@ -13,7 +13,7 @@ import math
 Note to user: 
 - Cookie clicker saves your save in a cookies file. Selenium can handle this with 
 the line `chrome_options.add_argument("user-data-dir=fresh_start")`
-which saves those files in a folder in the project dir. Before first run, youll want to set start
+which saves those files in a folder in the project dir. Before first run, you'll want to set start
 delay to a high value so you can go in, select your language and change some necessary settings.
 - in settings, you must change screen reader mode to on for the upgrades (not buildings) to work. 
 You should also change Short Numbers to off, in case you ever get into the millions, which would break
@@ -33,14 +33,25 @@ LOOPS_PER_CYCLE = 900
 DELAY_PER_CYCLE = 4
 D_INC_RATE = 1.3  # delay increase rate
 D_INC_TYPE = 1  # 0 for linear, 1 for quadratic, 2 for logarithmic
-TARGET_CURSORS = 15
+TARGET_CURSORS = 10
 # -------------------------------------------------------------------------
 start_delay = 10
 
 
+def get_cps(driver_instance):
+    while True:
+        try:
+            cps_element = driver_instance.find_element(By.CSS_SELECTOR, "#cookiesPerSecond")
+            cps = cps_element.text
+            cps = cps.split(" ")[2]
+            return cps
+        except StaleElementReferenceException:
+            time.sleep(0.1)
+
+
 def append_csv():
-    file_exists = os.path.isfile("results2.csv")
-    with open("results2.csv", mode='a', newline='') as file:
+    file_exists = os.path.isfile("results.csv")
+    with open("results.csv", mode='a', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=[
             "minutes_run",
             "delay/loop",
@@ -130,9 +141,7 @@ print("cycle: ", cycle)
 while True:
     if time.time() > quittin_time:
         thread.stop()
-        time.sleep(0.5)  # may prevent stale ref exception
-        cookies_per_second = driver.find_element(By.CSS_SELECTOR, "#cookiesPerSecond").text
-        cookies_per_second = cookies_per_second.split(" ")[2]
+        cookies_per_second = get_cps(driver)
         print("cookies per second: ", cookies_per_second)
         reset()
         append_csv()
@@ -146,7 +155,7 @@ while True:
         # ---------------cycle delay---------------
         match D_INC_TYPE:
             case 0:  # linear
-                cycle_delay = DELAY_PER_CYCLE + (cycle -1) * D_INC_RATE
+                cycle_delay = DELAY_PER_CYCLE + (cycle - 1) * D_INC_RATE
             case 1:  # quadratic
                 cycle_delay = DELAY_PER_CYCLE + D_INC_RATE * (cycle - 1)**2
             case 2:  # logarithmic
@@ -157,7 +166,6 @@ while True:
             print("shortening delay")
         time.sleep(cycle_delay)
         print("cycle delay was", cycle_delay)
-
 
     # ------cookie-earning code------
 
@@ -205,7 +213,6 @@ while True:
         if products:
             for i in range(min(2, len(products) - 1), 0, -1):
                 products[i].click()
-
 
     time.sleep(DELAY_PER_LOOP)
     # loop count
