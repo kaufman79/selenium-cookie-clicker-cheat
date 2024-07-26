@@ -175,10 +175,10 @@ while True:
     #     pass
 
     #                               ------BUY THINGS------
-    # ---------------------buy upgrades, start with priciest ---------------------------
+    # ---------------------buy upgrades, start with cheapest ---------------------------
     try:
         upgrades = driver.find_elements(By.CSS_SELECTOR, "#store #upgrades .enabled")
-        for i in range(len(upgrades) - 1, -1, -1):
+        for i in range(0, len(upgrades), 1):
             upgrades[i].click()
     except (NoSuchElementException, StaleElementReferenceException):
         pass
