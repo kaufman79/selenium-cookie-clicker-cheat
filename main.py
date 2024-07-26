@@ -9,7 +9,6 @@ import os
 import math
 
 
-
 """
 Note to user: 
 - Cookie clicker saves your save in a cookies file. Selenium can handle this with 
@@ -30,7 +29,9 @@ LOOPS_PER_CYCLE = 900
 DELAY_PER_CYCLE = 13
 D_INC_RATE = 1.6  # delay increase rate
 D_INC_TYPE = 1  # 0 for linear, 1 for quadratic, 2 for logarithmic
-# --------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+start_delay = 35
+
 
 file_exists = os.path.isfile("results.csv")
 
@@ -96,7 +97,6 @@ class StoppableThread(threading.Thread):
         self._stop_event.set()
 
 
-# keep Chrome open after program finishes by configuring option and passing that as arg below
 chrome_options = webdriver.ChromeOptions()
 # load cookies, ie save file
 chrome_options.add_argument("user-data-dir=fresh_start")
@@ -106,7 +106,6 @@ driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://orteil.dashnet.org/cookieclicker/")
 actions = ActionChains(driver)
 
-start_delay = 10
 time.sleep(start_delay)
 
 start_time = time.time()
@@ -137,11 +136,15 @@ while True:
         # delay
         match D_INC_TYPE:
             case 0:  # linear
-                time.sleep(DELAY_PER_CYCLE + (cycle -1) * D_INC_RATE)
+                cycle_delay = DELAY_PER_CYCLE + (cycle -1) * D_INC_RATE
+                time.sleep(cycle_delay)
             case 1:  # quadratic
-                time.sleep(DELAY_PER_CYCLE + D_INC_RATE * (cycle - 1)**2)
+                cycle_delay = DELAY_PER_CYCLE + D_INC_RATE * (cycle - 1)**2
+                time.sleep(cycle_delay)
             case 2:  # logarithmic
-                time.sleep(DELAY_PER_CYCLE + D_INC_RATE * math.log(cycle + 1))
+                cycle_delay = DELAY_PER_CYCLE + D_INC_RATE * math.log(cycle + 1)
+                time.sleep(cycle_delay)
+        print("cycle_delay was", cycle_delay)
 
     # ------cookie-earning code------
 
