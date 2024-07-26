@@ -37,10 +37,8 @@ D_INC_TYPE = 2  # 0 for linear, 1 for quadratic, 2 for logarithmic
 start_delay = 10
 
 
-file_exists = os.path.isfile("results.csv")
-
-
 def append_csv():
+    file_exists = os.path.isfile("results.csv")
     with open("results.csv", mode='a', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=[
             "minutes_run",
@@ -50,7 +48,7 @@ def append_csv():
             "delay_increase_rate",
             "delay_increase_type",
             "final_cookies/second"
-            ])
+        ])
 
         if not file_exists:
             writer.writeheader()
