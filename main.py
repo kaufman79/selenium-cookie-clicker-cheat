@@ -20,17 +20,21 @@ You should also change Short Numbers to off, in case you ever get into the milli
 certain lines of code.
 - clicking a golden cookie, should it come up, is possible, but that code is currently commented
 out, since the point of this code is to test the algorithm and compare results, which RNG would skew.
+- some ideas to implement: 
+    - place the building buying outside of the main loop, and just buy buildings every so often. Though
+    the same effect can sorta be achieved with lowering loops per cycle and adding delay.
+    - buy most advanced (lowest in list) building option, or prioritize grandmas maybe. not cursors.
 """
 
 # ---------------variables that affect algorithm performance---------------
 MINUTES_RUN = 5
 DELAY_PER_LOOP = 0
 LOOPS_PER_CYCLE = 900
-DELAY_PER_CYCLE = 13
-D_INC_RATE = 1.6  # delay increase rate
-D_INC_TYPE = 1  # 0 for linear, 1 for quadratic, 2 for logarithmic
+DELAY_PER_CYCLE = 15
+D_INC_RATE = 4  # delay increase rate
+D_INC_TYPE = 2  # 0 for linear, 1 for quadratic, 2 for logarithmic
 # -------------------------------------------------------------------------
-start_delay = 35
+start_delay = 10
 
 
 file_exists = os.path.isfile("results.csv")
@@ -121,6 +125,7 @@ print("cycle: ", cycle)
 while True:
     if time.time() > quittin_time:
         thread.stop()
+        time.sleep(0.5)  # may prevent stale ref exception
         cookies_per_second = driver.find_element(By.CSS_SELECTOR, "#cookiesPerSecond").text
         cookies_per_second = cookies_per_second.split(" ")[2]
         print("cookies per second: ", cookies_per_second)
