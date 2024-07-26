@@ -23,7 +23,7 @@ out, since the point of this code is to test the algorithm and compare results, 
 - some ideas to implement: 
     - place the building buying outside of the main loop, and just buy buildings every so often. Though
     the same effect can sorta be achieved with lowering loops per cycle and adding delay.
-    - buy most advanced (lowest in list) building option, or prioritize grandmas maybe. not cursors.
+    - buy most advanced (lowest in list) building option, or prioritize grandmas maybe. not cursors after x number.
 """
 
 # ---------------variables that affect algorithm performance---------------
@@ -136,18 +136,24 @@ while True:
         cycle += 1
         print("cycle: ", cycle)
         loop_nr = 0
-        # delay
+        # ---------------delay---------------
         match D_INC_TYPE:
             case 0:  # linear
                 cycle_delay = DELAY_PER_CYCLE + (cycle -1) * D_INC_RATE
-                time.sleep(cycle_delay)
+                if not cycle_delay > quittin_time - time.time():
+                    time.sleep(cycle_delay)
+                    print("cycle_delay was", cycle_delay)
             case 1:  # quadratic
                 cycle_delay = DELAY_PER_CYCLE + D_INC_RATE * (cycle - 1)**2
-                time.sleep(cycle_delay)
+                if not cycle_delay > quittin_time - time.time():
+                    time.sleep(cycle_delay)
+                    print("cycle_delay was", cycle_delay)
             case 2:  # logarithmic
                 cycle_delay = DELAY_PER_CYCLE + D_INC_RATE * math.log(cycle + 1)
-                time.sleep(cycle_delay)
-        print("cycle_delay was", cycle_delay)
+                if not cycle_delay > quittin_time - time.time():
+                    time.sleep(cycle_delay)
+                    print("cycle_delay was", cycle_delay)
+
 
     # ------cookie-earning code------
 
