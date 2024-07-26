@@ -6,26 +6,31 @@ import time
 import threading
 import csv
 import os
+import math
 
 
-# Notes:
-""" 
-- Cookie clicker saves your save in a cookies file. Selenium can handle this with the line `chrome_options.add_argument("user-data-dir=fresh_start")`
+
+"""
+Note to user: 
+- Cookie clicker saves your save in a cookies file. Selenium can handle this with 
+the line `chrome_options.add_argument("user-data-dir=fresh_start")`
 which saves those files in a folder in the project dir. Before first run, youll want to set start
 delay to a high value so you can go in, select your language and change some necessary settings.
 - in settings, you must change screen reader mode to on for the upgrades (not buildings) to work. 
 You should also change Short Numbers to off, in case you ever get into the millions, which would break
 certain lines of code.
+- clicking a golden cookie, should it come up, is possible, but that code is currently commented
+out, since the point of this code is to test the algorithm and compare results, which RNG would skew.
 """
 
-# variables that affect algorithm performance, to write into csv
-# D_INC_RATE - delay increase rate - is multiplied by the current cycle
-# and added to DELAY_PER_CYCLE
+# ---------------variables that affect algorithm performance---------------
 MINUTES_RUN = 5
 DELAY_PER_LOOP = 0
-LOOPS_PER_CYCLE = 400
-DELAY_PER_CYCLE = 15
-D_INC_RATE = 1
+LOOPS_PER_CYCLE = 900
+DELAY_PER_CYCLE = 13
+D_INC_RATE = 1.6  # delay increase rate
+D_INC_TYPE = 1  # 0 for linear, 1 for quadratic, 2 for logarithmic
+# --------------------------------------------------------------------------
 
 file_exists = os.path.isfile("results.csv")
 
@@ -38,6 +43,7 @@ def append_csv():
             "loops/cycle",
             "base_delay/cycle",
             "delay_increase_rate",
+            "delay_increase_type",
             "final_cookies/second"
             ])
 
@@ -50,6 +56,7 @@ def append_csv():
             "delay/loop": DELAY_PER_LOOP,
             "base_delay/cycle": DELAY_PER_CYCLE,
             "delay_increase_rate": D_INC_RATE,
+            "delay_increase_type": D_INC_TYPE,
             "final_cookies/second": cookies_per_second
         }]
 
@@ -127,7 +134,14 @@ while True:
         cycle += 1
         print("cycle: ", cycle)
         loop_nr = 0
-        time.sleep(DELAY_PER_CYCLE + (cycle -1) * D_INC_RATE)
+        # delay
+        match D_INC_TYPE:
+            case 0:  # linear
+                time.sleep(DELAY_PER_CYCLE + (cycle -1) * D_INC_RATE)
+            case 1:  # quadratic
+                time.sleep(DELAY_PER_CYCLE + D_INC_RATE * (cycle - 1)**2)
+            case 2:  # logarithmic
+                time.sleep(DELAY_PER_CYCLE + D_INC_RATE * math.log(cycle + 1))
 
     # ------cookie-earning code------
 
