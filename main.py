@@ -30,9 +30,9 @@ out, since the point of this code is to test the algorithm and compare results, 
 MINUTES_RUN = 5
 DELAY_PER_LOOP = 0
 LOOPS_PER_CYCLE = 900
-DELAY_PER_CYCLE = 15
-D_INC_RATE = 4  # delay increase rate
-D_INC_TYPE = 2  # 0 for linear, 1 for quadratic, 2 for logarithmic
+DELAY_PER_CYCLE = 4
+D_INC_RATE = 1.3  # delay increase rate
+D_INC_TYPE = 1  # 0 for linear, 1 for quadratic, 2 for logarithmic
 # -------------------------------------------------------------------------
 start_delay = 10
 
@@ -142,25 +142,16 @@ while True:
         match D_INC_TYPE:
             case 0:  # linear
                 cycle_delay = DELAY_PER_CYCLE + (cycle -1) * D_INC_RATE
-                if not cycle_delay > quittin_time - time.time():
-                    time.sleep(cycle_delay)
-                    print("cycle_delay was", cycle_delay)
-                else:
-                    print("not enough time, skipping cycle delay")
             case 1:  # quadratic
                 cycle_delay = DELAY_PER_CYCLE + D_INC_RATE * (cycle - 1)**2
-                if not cycle_delay > quittin_time - time.time():
-                    time.sleep(cycle_delay)
-                    print("cycle_delay was", cycle_delay)
-                else:
-                    print("not enough time, skipping cycle delay")
             case 2:  # logarithmic
                 cycle_delay = DELAY_PER_CYCLE + D_INC_RATE * math.log(cycle + 1)
-                if not cycle_delay > quittin_time - time.time():
-                    time.sleep(cycle_delay)
-                    print("cycle_delay was", cycle_delay)
-                else:
-                    print("not enough time, skipping cycle delay")
+
+        if cycle_delay > quittin_time - time.time():
+            cycle_delay = quittin_time - time.time() - 1
+            print("shortening delay")
+        time.sleep(cycle_delay)
+        print("cycle delay was", cycle_delay)
 
 
     # ------cookie-earning code------
