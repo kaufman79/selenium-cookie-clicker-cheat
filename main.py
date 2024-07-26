@@ -38,8 +38,8 @@ start_delay = 10
 
 
 def append_csv():
-    file_exists = os.path.isfile("results.csv")
-    with open("results.csv", mode='a', newline='') as file:
+    file_exists = os.path.isfile("results2.csv")
+    with open("results2.csv", mode='a', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=[
             "minutes_run",
             "delay/loop",
@@ -47,8 +47,9 @@ def append_csv():
             "base_delay/cycle",
             "delay_increase_rate",
             "delay_increase_type",
-            "final_cookies/second"
-        ])
+            "final_cookies/second",
+            "notes"
+            ])
 
         if not file_exists:
             writer.writeheader()
@@ -60,7 +61,8 @@ def append_csv():
             "base_delay/cycle": DELAY_PER_CYCLE,
             "delay_increase_rate": D_INC_RATE,
             "delay_increase_type": D_INC_TYPE,
-            "final_cookies/second": cookies_per_second
+            "final_cookies/second": cookies_per_second,
+            "notes": ""
         }]
 
         for row in data:
@@ -136,23 +138,29 @@ while True:
         cycle += 1
         print("cycle: ", cycle)
         loop_nr = 0
-        # ---------------delay---------------
+        # ---------------cycle delay---------------
         match D_INC_TYPE:
             case 0:  # linear
                 cycle_delay = DELAY_PER_CYCLE + (cycle -1) * D_INC_RATE
                 if not cycle_delay > quittin_time - time.time():
                     time.sleep(cycle_delay)
                     print("cycle_delay was", cycle_delay)
+                else:
+                    print("not enough time, skipping cycle delay")
             case 1:  # quadratic
                 cycle_delay = DELAY_PER_CYCLE + D_INC_RATE * (cycle - 1)**2
                 if not cycle_delay > quittin_time - time.time():
                     time.sleep(cycle_delay)
                     print("cycle_delay was", cycle_delay)
+                else:
+                    print("not enough time, skipping cycle delay")
             case 2:  # logarithmic
                 cycle_delay = DELAY_PER_CYCLE + D_INC_RATE * math.log(cycle + 1)
                 if not cycle_delay > quittin_time - time.time():
                     time.sleep(cycle_delay)
                     print("cycle_delay was", cycle_delay)
+                else:
+                    print("not enough time, skipping cycle delay")
 
 
     # ------cookie-earning code------
