@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 import time
 import threading
@@ -14,8 +13,8 @@ Note to user:
 - Cookie clicker saves your save in a cookies file. Selenium can handle this with 
 the line `chrome_options.add_argument("user-data-dir=fresh_start")`
 which saves those files in a folder in the project dir. Before first run, you'll want to set start
-delay to a high value so you can go in, select your language and change some necessary settings.
-- in settings, you must change screen reader mode to on for the upgrades (not buildings) to work. 
+delay (variable start_delay, just below) to a high value so you can go in, select your language and change some necessary settings.
+- in settings, you may have to change screen reader mode to on for the upgrades (not buildings) to work. 
 You should also change Short Numbers to off, in case you ever get into the millions, which would break
 certain lines of code.
 - clicking a golden cookie, should it come up, is possible, but that code is currently commented
@@ -23,17 +22,17 @@ out, since the point of this code is to test the algorithm and compare results, 
 - some ideas to implement: 
     - place the building buying outside of the main loop, and just buy buildings every so often. Though
     the same effect can sorta be achieved with lowering loops per cycle and adding delay.
-    - buy most advanced (lowest in list) building option, or prioritize grandmas maybe. not cursors after x number.
+    - buy most advanced (lowest in list) building option, or prioritize grandmas maybe.
 """
 
 # ---------------variables that affect algorithm performance---------------
 MINUTES_RUN = 5
 DELAY_PER_LOOP = 0
-LOOPS_PER_CYCLE = 900
-DELAY_PER_CYCLE = 4
+LOOPS_PER_CYCLE = 1000
+DELAY_PER_CYCLE = 4  # initial delay before next cycle, to save up for upgrades
 D_INC_RATE = 1.3  # delay increase rate
 D_INC_TYPE = 1  # 0 for linear, 1 for quadratic, 2 for logarithmic
-TARGET_CURSORS = 10
+TARGET_CURSORS = 10  # don't buy more than x cursors
 # -------------------------------------------------------------------------
 start_delay = 10
 
@@ -122,7 +121,6 @@ chrome_options.add_experimental_option("detach", True)
 
 driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://orteil.dashnet.org/cookieclicker/")
-actions = ActionChains(driver)
 
 time.sleep(start_delay)
 
